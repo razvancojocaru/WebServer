@@ -41,8 +41,6 @@ public class Server {
 
 
 class HandleRequest implements Runnable {
-
-    private final static int BUFSIZE = 1024;
     private Socket clientSocket;
     private String dir;
 
@@ -54,34 +52,30 @@ class HandleRequest implements Runnable {
     @Override
     public void run() {
         try {
-//            byte[] buffer = new byte[BUFSIZE];
-//            int count;
-//            InputStream fromSocket = clientSocket.getInputStream();
-//            OutputStream toSocket = clientSocket.getOutputStream();
-//
-//            // read file name from socket
-//            count = fromSocket.read(buffer);
-//            String fileName = new String(buffer).substring(0, count);
-//            System.out.println(fileName);
-//            // send ACK
-//            toSocket.write("ok".getBytes());
-//            toSocket.flush();
-//
-//            System.out.println("DONE");
 
             BufferedReader fromSocket = new BufferedReader(
                     new InputStreamReader(clientSocket.getInputStream()));
             BufferedWriter toSocket = new BufferedWriter(
                     new OutputStreamWriter(clientSocket.getOutputStream()));
+
+            // read request header from socket
+            StringBuffer sb = new StringBuffer();
             String header;
             header = fromSocket.readLine();
             while ((header != null) &&
                     (header.length() != 0)) {
-                System.out.println(header);
+                sb.append(header + "\r\n");
                 header = fromSocket.readLine();
             }
-
+            System.out.println(sb.toString());
             System.out.println("DONE");
+
+            // parse header
+            HttpRequest request = new HttpRequest(sb.toString());
+            request.parse();
+
+            toSocket.write("OK");
+            toSocket.flush();
 
             clientSocket.close();
         } catch (IOException e) {
