@@ -13,6 +13,8 @@ public class HttpRequest {
     private String rawHeader;
 //    private boolean parsed = false;
     private Methods method;
+    private String uri;
+    private String httpVersion;
     private Map<String, String> headers;
 
     public HttpRequest(String rawHeader) {
@@ -26,14 +28,42 @@ public class HttpRequest {
      */
     public synchronized StatusCode parse() {
 //        parsed = true;
+        String[] headerLines = rawHeader.split("\r\n");
+
         // parse request line
+        // <Method> <URI> <HTTP_version>
+        String[] requestLine = headerLines[0].split(" ");
+        try {
+            method = Methods.valueOf(requestLine[0]);
+        } catch (IllegalArgumentException e) {
+            return StatusCode.BadRequest;
+        }
+        uri = requestLine[1];
+        httpVersion = requestLine[2];
+        if (!httpVersion.contains("HTTP/")) {
+            return StatusCode.BadRequest;
+        }
+        httpVersion = httpVersion.split("HTTP/")[1];
+        if (!httpVersion.equals("1.1") && !httpVersion.equals("1.0")) {
+            return StatusCode.BadRequest;
+        }
 
         // parse header fields
+        for (int i = 1; i < headerLines.length; i++) {
+            String[] headerLine = headerLines[i].split(": ");
+            if (headerLine.length != 2) {
+                return StatusCode.BadRequest;
+            }
+            headers.put(headerLine[0], headerLine[1]);
+        }
 
         return StatusCode.OK;
     }
 
-//    public boolean isParsed() {
+    public String getUri() {
+        return uri;
+    }
+    //    public boolean isParsed() {
 //        return parsed;
 //    }
 }

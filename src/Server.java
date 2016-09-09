@@ -1,6 +1,9 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -11,7 +14,8 @@ import java.util.concurrent.Executors;
  */
 public class Server {
     private int port = 8080;
-    private String dir;
+    private String dir = "/home/razvanc/webfiles";
+    private Path rootDir;
     private ExecutorService threadPool;
     private ServerSocket serverSocket;
 
@@ -21,17 +25,24 @@ public class Server {
 
     public void start() {
         //TODO check directory availability
+        try {
+            rootDir = Paths.get(dir);
+        } catch (InvalidPathException e) {
+            e.printStackTrace();
+            return;
+        }
 
         try {
             serverSocket = new ServerSocket(port);
         } catch (IOException e) {
             e.printStackTrace();
+            return;
         }
 
         try {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                threadPool.execute(new HandleRequest(clientSocket, dir));
+                threadPool.execute(new HandleRequest(clientSocket, rootDir));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -42,9 +53,9 @@ public class Server {
 
 class HandleRequest implements Runnable {
     private Socket clientSocket;
-    private String dir;
+    private Path dir;
 
-    public HandleRequest(Socket socket, String dir) {
+    public HandleRequest(Socket socket, Path dir) {
         this.clientSocket = socket;
         this.dir = dir;
     }
@@ -68,14 +79,35 @@ class HandleRequest implements Runnable {
                 header = fromSocket.readLine();
             }
             System.out.println(sb.toString());
-            System.out.println("DONE");
 
             // parse header
             HttpRequest request = new HttpRequest(sb.toString());
-            request.parse();
+            StatusCode status = request.parse();
 
-            toSocket.write("OK");
+            // build response message
+            HttpResponse response = new HttpResponse(status, request, dir);
+            InputStream fileStream = response.build();
+
+            toSocket.write(response.toString());
             toSocket.flush();
+
+            // if necessary, send file to client
+            if (fileStream != null) {
+                BufferedReader fromFile = new BufferedReader(
+                        new InputStreamReader(fileStream));
+                String fileLine;
+                try {
+                    while (((fileLine = fromFile.readLine()) != null) &&
+                            (fileLine.length() != 0)) {
+                        toSocket.write(fileLine);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                toSocket.flush();
+            }
+            System.out.println(response.getStatusLine());
+            System.out.println("DONE");
 
             clientSocket.close();
         } catch (IOException e) {
