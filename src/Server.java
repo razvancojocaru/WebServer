@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,7 +15,7 @@ import java.util.concurrent.Executors;
  */
 public class Server {
     private int port = 8080;
-    private String dir = "/home/razvanc/webfiles";
+    private String dir = "/home/razvan/webfiles";
     private Path rootDir;
     private ExecutorService threadPool;
     private ServerSocket serverSocket;
@@ -24,10 +25,13 @@ public class Server {
     }
 
     public void start() {
-        //TODO check directory availability
         try {
             rootDir = Paths.get(dir);
+            if (!Files.exists(rootDir)) {
+                throw new InvalidPathException(" ", " ");
+            }
         } catch (InvalidPathException e) {
+            System.err.println("Server root directory not found");
             e.printStackTrace();
             return;
         }

@@ -1,13 +1,11 @@
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Processes a valid HTTP Request.
@@ -16,9 +14,10 @@ public class HttpResponse {
     private StatusCode status;
     private HttpRequest request;
     private String statusLine;
-    private String content = null;
     private Map<String, String> headers;
     private Path rootDir;
+    private InputStream resourceStream;
+    private Path uriFullPath;
 
     public HttpResponse(StatusCode status, HttpRequest request, Path dir) {
         this.status = status;
@@ -34,35 +33,48 @@ public class HttpResponse {
         }
 
         // check if URI is valid
-        Path fullPath;
         String uri = request.getUri();
         if (uri.equals("/")) {
             uri = "index.html";
         }
         try {
-            fullPath = Paths.get(rootDir.toString(), uri);
-            if (!Files.exists(fullPath)) {
+            uriFullPath = Paths.get(rootDir.toString(), uri);
+            if (!Files.exists(uriFullPath)) {
                 throw new InvalidPathException(" ", " ");
             }
         } catch (InvalidPathException e) {
             statusLine = StatusCode.NotFound.getStatusLine();
             return null;
         }
-        System.out.println(fullPath.toString());
-
-
-        System.out.println(Files.exists(fullPath));
-        System.out.println(fullPath.toString());
+        System.out.println(uriFullPath.toString());
         statusLine = status.getStatusLine();
 
-        InputStream i;
         try {
-            i = new FileInputStream(fullPath.toString());
+            resourceStream = new FileInputStream(uriFullPath.toString());
         } catch (FileNotFoundException e) {
             statusLine = StatusCode.NotFound.getStatusLine();
             return null;
         }
-        return i;
+
+        handleHttpHeaders();
+
+        handleHttpMethod();
+
+        return resourceStream;
+    }
+
+    private void handleHttpMethod() {
+        if (request.getMethod() == Methods.GET) {
+
+        } else if (request.getMethod() == Methods.HEAD) {
+            resourceStream = null;
+        }
+    }
+
+    private void handleHttpHeaders() {
+        // generate Content-Length
+        long fileSize = uriFullPath.toFile().length();
+        headers.put("Content-Length", Objects.toString(fileSize, null));
     }
 
     public String getStatusLine() {
@@ -77,9 +89,6 @@ public class HttpResponse {
             sb.append(header.getKey() + ": " + header.getValue());
         }
         sb.append("\r\n");
-        if (content != null) {
-            sb.append(content + "\r\n");
-        }
         return sb.toString();
     }
 }

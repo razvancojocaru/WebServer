@@ -1,8 +1,10 @@
 /**
  * Created by razvan on 08.09.2016.
  */
-class Header {
 
+enum Methods {
+    GET,
+    HEAD
 }
 
 enum StatusCode {

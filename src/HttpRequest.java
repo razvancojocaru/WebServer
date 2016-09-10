@@ -5,13 +5,8 @@ import java.util.Map;
  * Created by razvan on 06.09.2016.
  */
 public class HttpRequest {
-    private enum Methods {
-        GET,
-        HEAD
-    }
 
     private String rawHeader;
-//    private boolean parsed = false;
     private Methods method;
     private String uri;
     private String httpVersion;
@@ -27,7 +22,6 @@ public class HttpRequest {
      * Performs sintactic validation.
      */
     public synchronized StatusCode parse() {
-//        parsed = true;
         String[] headerLines = rawHeader.split("\r\n");
 
         // parse request line
@@ -63,7 +57,9 @@ public class HttpRequest {
     public String getUri() {
         return uri;
     }
-    //    public boolean isParsed() {
-//        return parsed;
-//    }
+
+    public Methods getMethod() {
+        return method;
+    }
+
 }
