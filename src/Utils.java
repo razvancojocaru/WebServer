@@ -1,10 +1,18 @@
 /**
- * Created by razvan on 08.09.2016.
+ * Basic utility classes for HTTP.
  */
 
 enum Methods {
     GET,
     HEAD
+}
+
+enum NotImplementedMethods {
+    OPTIONS,
+    PUT,
+    DELETE,
+    TRACE,
+    CONNECT
 }
 
 enum StatusCode {

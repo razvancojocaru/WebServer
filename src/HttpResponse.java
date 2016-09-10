@@ -33,8 +33,10 @@ public class HttpResponse {
         }
 
         // check if URI is valid
+        // also perform security check for ".."
         String uri = request.getUri();
-        if (uri.equals("/")) {
+        if ((uri.equals("/")) ||
+                (uri.contains(".."))){
             uri = "index.html";
         }
         try {
@@ -46,7 +48,6 @@ public class HttpResponse {
             statusLine = StatusCode.NotFound.getStatusLine();
             return null;
         }
-        System.out.println(uriFullPath.toString());
         statusLine = status.getStatusLine();
 
         try {

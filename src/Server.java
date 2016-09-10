@@ -72,6 +72,7 @@ class HandleRequest implements Runnable {
                     new InputStreamReader(clientSocket.getInputStream()));
             BufferedWriter toSocket = new BufferedWriter(
                     new OutputStreamWriter(clientSocket.getOutputStream()));
+            OutputStream socketOutput = clientSocket.getOutputStream();
 
             // read request header from socket
             StringBuffer sb = new StringBuffer();
@@ -82,7 +83,7 @@ class HandleRequest implements Runnable {
                 sb.append(header + "\r\n");
                 header = fromSocket.readLine();
             }
-            System.out.println(sb.toString());
+//            System.out.println(sb.toString());
 
             // parse header
             HttpRequest request = new HttpRequest(sb.toString());
@@ -93,25 +94,23 @@ class HandleRequest implements Runnable {
             InputStream fileStream = response.build();
 
             toSocket.write(response.toString());
+            toSocket.write("\r\n");
             toSocket.flush();
 
             // if necessary, send file to client
             if (fileStream != null) {
-                BufferedReader fromFile = new BufferedReader(
-                        new InputStreamReader(fileStream));
-                String fileLine;
+                byte[] buffer = new byte[1024];
+                int size;
                 try {
-                    while (((fileLine = fromFile.readLine()) != null) &&
-                            (fileLine.length() != 0)) {
-                        toSocket.write(fileLine);
+                    while ((size = fileStream.read(buffer)) != -1) {
+                        socketOutput.write(buffer, 0, size);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 toSocket.flush();
             }
-            System.out.println(response.getStatusLine());
-            System.out.println("DONE");
+//            System.out.print(response.getStatusLine());
 
             clientSocket.close();
         } catch (IOException e) {

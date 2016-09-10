@@ -2,7 +2,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by razvan on 06.09.2016.
+ * Processes HTTP Request headers and performs basic validation.
  */
 public class HttpRequest {
 
@@ -19,7 +19,7 @@ public class HttpRequest {
 
     /**
      * Reads a HTTP request header from a raw string.
-     * Performs sintactic validation.
+     * Performs syntactic validation.
      */
     public synchronized StatusCode parse() {
         String[] headerLines = rawHeader.split("\r\n");
@@ -27,10 +27,17 @@ public class HttpRequest {
         // parse request line
         // <Method> <URI> <HTTP_version>
         String[] requestLine = headerLines[0].split(" ");
+        System.out.println(headerLines[0]);
         try {
             method = Methods.valueOf(requestLine[0]);
         } catch (IllegalArgumentException e) {
-            return StatusCode.BadRequest;
+            // check if method is valid but not implemented
+            try {
+                NotImplementedMethods.valueOf(requestLine[0]);
+                return StatusCode.NotImplemented;
+            } catch (IllegalArgumentException notImp) {
+                return StatusCode.BadRequest;
+            }
         }
         uri = requestLine[1];
         httpVersion = requestLine[2];
