@@ -10,18 +10,20 @@ import java.util.concurrent.Executors;
 
 /**
  * Handles socket connections and multitasking.
- * Uses byte streams for IO.
  * Uses Executors for concurrency.
  */
 public class Server {
-    private int port = 8080;
-    private String dir = "/home/razvan/webfiles";
+
+    private int port;
+    private String dir;
     private Path rootDir;
     private ExecutorService threadPool;
     private ServerSocket serverSocket;
 
-    public Server() {
-        threadPool = Executors.newFixedThreadPool(100);
+    public Server(int port, String rootDir, int threadPoolSize) {
+        this.port = port;
+        this.dir = rootDir;
+        threadPool = Executors.newFixedThreadPool(threadPoolSize);
     }
 
     public void start() {

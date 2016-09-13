@@ -3,7 +3,8 @@ import java.net.Socket;
 import java.nio.file.Path;
 
 /**
- * Created by razvan on 10.09.2016.
+ * Process a HTTP request and send response.
+ * Uses character streams for headers and byte streams for sending resources.
  */
 class HandleRequest implements Runnable {
     private Socket clientSocket;

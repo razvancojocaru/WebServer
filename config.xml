@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<config>
+    <port>8080</port>
+    <rootDir>/home/razvan/webfiles</rootDir>
+    <threadPoolSize>100</threadPoolSize>
+</config>
