@@ -1,3 +1,5 @@
+package ro.razvancojocaru.main;
+
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -8,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Main entry point.
+ * ro.demo.main.Main entry point.
  * Imports configuration parameters from config file and starts server.
  */
 public class Main {

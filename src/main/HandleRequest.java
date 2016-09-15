@@ -1,3 +1,5 @@
+package ro.razvancojocaru.main;
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Path;
@@ -34,7 +36,6 @@ class HandleRequest implements Runnable {
                 sb.append(header + "\r\n");
                 header = fromSocket.readLine();
             }
-//            System.out.println(sb.toString());
 
             // parse header
             HttpRequest request = new HttpRequest(sb.toString());
@@ -61,7 +62,6 @@ class HandleRequest implements Runnable {
                 }
                 toSocket.flush();
             }
-//            System.out.print(response.getStatusLine());
 
             clientSocket.close();
         } catch (IOException e) {

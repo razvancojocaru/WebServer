@@ -1,3 +1,5 @@
+package ro.razvancojocaru.main;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -33,7 +35,7 @@ public class Server {
                 throw new InvalidPathException(" ", " ");
             }
         } catch (InvalidPathException e) {
-            System.err.println("Server root directory not found");
+            System.err.println("ro.demo.main.Server root directory not found");
             e.printStackTrace();
             return;
         }

@@ -1,3 +1,5 @@
+package ro.razvancojocaru.main;
+
 import java.util.HashMap;
 import java.util.Map;
 
